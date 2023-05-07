@@ -1,0 +1,234 @@
+
+"""
+Created on Mon Mar 27 14:50:39 2023
+
+@author: billymitchell
+"""
+# Import required libraries
+import pickle
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import numpy as np
+from matplotlib import pyplot as plt
+from torch.utils.data import Dataset, DataLoader
+from sklearn.preprocessing import  MinMaxScaler
+from sklearn.metrics import r2_score , mean_absolute_error
+
+
+# load the lists from the file using pickle
+with open("features.pickle", "rb") as f:
+    data = pickle.load(f)
+    
+# Remove rows for voltage, current and temp
+data = np.delete(data, [0,2,4,6,8,10], axis=1)
+
+
+# Clean outliers in data by averaging previous and next, keeping the same binary identifier
+binary_22 = data[22,5]
+binary_356 = data[356,5]
+binary_690 = data[690,5]
+
+data[22,:] = (data[21,:] + data[23,:])/2
+data[356,:] = (data[355,:] + data[357,:])/2
+data[690,:] = (data[689,:] + data[691,:])/2
+
+data[22,5] = binary_22
+data[356,5] = binary_356
+data[690,5] = binary_690
+
+# Define x and y data
+x = data[:, :-1]
+y = data[:, -1].reshape(-1, 1)
+
+# Define hyperparameters
+input_size = 6
+hidden_size = 10
+num_classes = 1
+num_epochs = 500
+batch_size = 34
+learning_rate = 0.01
+
+# Set the random seed for reproducibility
+torch.manual_seed(42)
+
+# Define database
+# Using first 2/3 of data for training and remaining third for testing 
+class MFBDataset(Dataset):
+    def __init__(self, x_tensor, y_tensor, train=True):
+        if train:
+            self.x = x_tensor[:2*len(x_tensor)//3]
+            self.y = y_tensor[:2*len(y_tensor)//3]
+        else:
+            self.x = x_tensor[2*len(x_tensor)//3:]
+            self.y = y_tensor[2*len(y_tensor)//3:]
+
+    def __getitem__(self, index):
+        return self.x[index], self.y[index]
+
+    def __len__(self):
+        return len(self.x)
+
+# Define the architectue of the DNN
+class NeuralNet(nn.Module):
+    def __init__(self, input_size, num_classes):
+        super(NeuralNet, self).__init__()
+        self.fc1 = nn.Linear(input_size, 12)
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(12, 10)
+        self.relu2 = nn.ReLU()
+        self.fc3 = nn.Linear(10, 8)
+        self.relu3 = nn.ReLU()
+        self.fc4 = nn.Linear(8, num_classes)
+
+    def forward(self, x):
+        out = self.fc1(x)
+        out = self.relu1(out)
+        out = self.fc2(out)
+        out = self.relu2(out)
+        out = self.fc3(out)
+        out = self.relu3(out)
+        out = self.fc4(out)
+        return out
+
+# Normalise data for x
+scaler = MinMaxScaler()
+x = scaler.fit_transform(x)
+
+x_tensor = torch.from_numpy(x).float()
+y_tensor = torch.from_numpy(y).float()
+
+train_dataset = MFBDataset(x_tensor, y_tensor, train=True)
+val_dataset = MFBDataset(x_tensor, y_tensor, train=False)
+
+train_loader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+val_loader = DataLoader(dataset=val_dataset, batch_size=334, shuffle=False)
+
+
+# Initialise model
+model = NeuralNet(input_size, num_classes)
+
+# loss and optimizer
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.001)
+
+# Lists to keep track of losses during training
+train_losses = []
+val_losses = []
+
+# Train the model
+for epoch in range(num_epochs):
+    
+    # Training
+    model.train()
+    train_loss = 0
+    for i, (x_train, y_train) in enumerate(train_loader):
+        optimizer.zero_grad()
+        output = model(x_train)
+        loss = criterion(output, y_train)
+        loss.backward()
+        optimizer.step()
+        train_loss += loss.item()
+    train_losses.append(train_loss / len(train_loader))
+
+    # Validation
+    model.eval()
+    val_loss = 0
+    val_output = []
+    real_output = []
+    with torch.no_grad():
+        for i, (x_val, y_val) in enumerate(val_loader):
+            output = model(x_val)
+            val_output.append(output)
+            real_output.append(y_val)
+            loss = criterion(output, y_val)
+            val_loss += loss.item()
+        val_losses.append(val_loss / len(val_loader))
+    # Print loss
+    print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_losses[-1]:.4f}, Val Loss: {val_losses[-1]:.4f}')
+
+# Plot loss curves
+plt.plot(train_losses, label='Train')
+plt.plot(val_losses, label='Validation')
+plt.ylim([0,20])
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+# convert to numpy arrays and concatenate horizontally
+real_y = real_output[0].numpy()
+predicted_y = val_output[0].numpy()
+
+# Apply the filter to the data
+window_size = 4
+smooth_data = np.convolve(predicted_y.flatten(), np.ones(window_size)/window_size, mode='same')
+smooth_data[:2] = 100
+smooth_data[332:]= smooth_data[330]
+
+# Define cycles for plotting
+cycles = np.arange(334).reshape(334, 1)
+
+# Initialise numpy arrays for errors
+raw_error = np.zeros([334,1])
+smooth_error = np.zeros([334,1])
+
+# Calculate errors
+for i in range(0,334):
+    raw_error[i] = predicted_y[i] - real_y[i]
+    smooth_error[i] = smooth_data[i] - real_y[i]
+
+plt.figure()
+plt.figure(figsize=(11,7))
+plt.plot(cycles, predicted_y, label='Estimation')
+plt.plot(cycles, real_y, label='Real')
+plt.title('Structure 1 DNN - B0007', fontsize = 16)
+plt.xlabel('Cycle number', fontsize = 16)
+plt.ylabel('SOH', fontsize = 16)
+plt.legend(fontsize = 14)
+plt.tick_params(labelsize=14)
+plt.show
+
+plt.figure()
+plt.figure(figsize=(11,7))
+plt.plot(cycles, smooth_data, label='Smoothed estimation',)
+plt.plot(cycles, real_y, label='Real')
+plt.title('Structure 1 DNN with smoothing - B0007', fontsize = 16)
+plt.xlabel('Cycle number', fontsize = 16)
+plt.ylabel('SOH', fontsize = 16)
+plt.legend(fontsize = 14)
+plt.tick_params(labelsize=14)
+plt.show
+
+plt.figure()
+plt.figure(figsize=(11,7))
+plt.plot(cycles, raw_error, label='Estimation')
+plt.plot(cycles, smooth_error, label='Smoothed estimation')
+plt.title('Structure 1 DNN error - B0007', fontsize = 16)
+plt.xlabel('Cycle number', fontsize = 16)
+plt.ylabel('Percentage error', fontsize = 16)
+plt.legend(fontsize = 14)
+plt.tick_params(labelsize=14)
+
+# define rmse function
+def rmse(errors):
+    mse = np.mean(errors**2)
+    return np.sqrt(mse)
+
+# print rmse for differnet errors
+print('Unsmoothed RMSE: ',rmse(raw_error))
+print('Smoothed RMSE: ',rmse(smooth_error))
+
+R_squared_value = r2_score(real_y.flatten(), smooth_data.flatten())
+print("R-squared value:", R_squared_value)
+
+# calculate MAE and print
+MAE_value = mean_absolute_error(real_y.flatten(), smooth_data.flatten())
+print("DNN Mean Absolute Error value:", MAE_value)
+
+# calculate max error and print
+print('Max error =', np.max(np.abs(smooth_error)))
+
+# save predictions to a pickle file
+with open("7,2n_predictions.pickle", "wb") as f:
+    pickle.dump(smooth_data, f)
