@@ -1,3 +1,10 @@
+"""
+Coupled_DNN.py
+Script for developing DNNs for coupled data structures
+University of Bath student number: 1100837540  
+Modified on 02/05/23
+"""
+
 # import required libraries
 import pickle
 import torch
