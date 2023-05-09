@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 27 14:50:39 2023
-
-@author: billymitchell
-"""
 # Import required libraries
 import pickle
 import torch
@@ -14,7 +7,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import MinMaxScaler
-import torch.nn.functional as F
 from sklearn.metrics import r2_score, mean_absolute_error
 
 # load the lists from the file using pickle
@@ -105,7 +97,7 @@ class NeuralNet(nn.Module):
         out = self.fc4(out)
         return out
 
-# Normalize input data
+# Normalise input data
 scaler = MinMaxScaler()
 x = scaler.fit_transform(x)
 y = scaler.fit_transform(y)
@@ -158,9 +150,6 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         for i, (x_val, y_val) in enumerate(val_loader):
             output = model(x_val)
-            # calculate RMSE
-            rmse = torch.sqrt(F.mse_loss(output, y_val))
-            print('RMSE:', rmse.item())
             val_output.append(output)
             real_output.append(y_val)
             loss = criterion(output, y_val)
@@ -170,7 +159,7 @@ for epoch in range(num_epochs):
         val_losses.append(val_loss / len(val_loader))
 
     # Print loss
-    print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_losses[-1]:.4f}, Val Loss: {val_losses[-1]:.4f}, RMSE = {rmse.item()}')
+    print(f'Epoch [{epoch+1}/{num_epochs}], Train Loss: {train_losses[-1]:.4f}, Val Loss: {val_losses[-1]:.4f}')
 
 # Plot loss curves
 plt.plot(train_losses, label='Train')
@@ -219,7 +208,7 @@ cycles = np.arange(0, 334, 2)
 cycles += 2
 cycles = cycles.reshape(-1, 1)
 
-# plot teh estimations
+# plot the estimations
 plt.figure()
 plt.figure(figsize=(11,7))
 plt.plot(cycles, predicted_y, label='Estimation')
