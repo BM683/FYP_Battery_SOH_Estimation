@@ -1,8 +1,8 @@
 """
-Feature_extraction.py
+Feature_Extraction.py
 Script for extracting features in data
 University of Bath student number: 1100837540  
-Modified on 25/04/23
+Modified on 09/05/23
 """
 
 # Import required libraries
