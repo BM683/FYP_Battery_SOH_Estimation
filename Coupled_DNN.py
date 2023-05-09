@@ -1,5 +1,4 @@
-
-
+# import required libraries
 import pickle
 import torch
 import torch.nn as nn
@@ -27,6 +26,7 @@ charge_discharge_column = 6
 charge = data[data[:, charge_discharge_column] == 0]
 discharge = data[data[:, charge_discharge_column] != 0]
 
+# define x and y for charge and discharge data 
 charge_x = charge[:, :-1]
 charge_x = np.delete(charge_x,[3,6],axis =1)
 charge_y = charge[:, -1].reshape(-1, 1)
@@ -34,9 +34,6 @@ charge_y = charge[:, -1].reshape(-1, 1)
 discharge_x = discharge[:, :-1]
 discharge_x = np.delete(discharge_x,[3,6],axis =1)
 discharge_y = discharge[:, -1].reshape(-1, 1)
-
-combined = np.concatenate([charge_x, charge_y], axis = 1)
-combined[0,5] = 100
 
 # define hyperparameters
 input_size = 5
