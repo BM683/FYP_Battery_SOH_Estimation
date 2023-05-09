@@ -1,3 +1,10 @@
+"""
+Feature_extraction.py
+Script for developing DNN for data structure 1
+University of Bath student number: 1100837540  
+Modified on 09/05/23
+"""
+
 # Import required libraries
 import pickle
 import torch
