@@ -58,7 +58,7 @@ y = np.mean(y, axis=1)
 input_size = 10
 hidden_size = 10
 num_classes = 1
-num_epochs = 1000
+num_epochs = 500
 batch_size = 34
 learning_rate = 0.01
 
@@ -135,8 +135,6 @@ out = 0
 
 # Train the model
 for epoch in range(num_epochs):
-    if out == 1:
-        break
     # Training
     model.train()
     train_loss = 0
@@ -161,8 +159,6 @@ for epoch in range(num_epochs):
             real_output.append(y_val)
             loss = criterion(output, y_val)
             val_loss += loss.item()
-            if loss < 0.0001 and (epoch > 400):
-                out = 1
         val_losses.append(val_loss / len(val_loader))
 
     # Print loss
@@ -192,12 +188,12 @@ error = np.zeros([167,1])
 for i in range(0,167):
     error[i] = predicted_y[i] - real_y[i]
     
-# calculate RMSE
+# calculate and RMSE
 def rmse(errors):
     mse = np.mean(errors**2)
     return np.sqrt(mse)
 
-print(rmse(error))
+print("RMSE: ",rmse(error))
 
 # calculate R squared
 R_squared_value = r2_score(real_y.flatten(), predicted_y.flatten())
