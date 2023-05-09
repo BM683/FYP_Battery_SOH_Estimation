@@ -1,10 +1,11 @@
 """
-Created on Mon Mar 27 14:50:39 2023
-
-@author: billymitchell
+Gaussian_Process.py
+Script for developing Gaussian process model
+University of Bath student number: 1100837540  
+Modified on 03/05/23
 """
-# Import required libraries
 
+# Import required libraries
 import pickle
 import torch
 import numpy as np
