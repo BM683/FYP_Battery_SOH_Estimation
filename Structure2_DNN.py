@@ -1,6 +1,6 @@
 """
-Feature_extraction.py
-Script for developing DNN for data structure 1
+Structure2_DNN.py
+Script for developing DNN for data structure 2
 University of Bath student number: 1100837540  
 Modified on 09/05/23
 """
