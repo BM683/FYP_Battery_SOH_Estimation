@@ -1,11 +1,11 @@
-
 """
-Created on Fri Mar 17 14:33:24 2023
-
-@author: billymitchell
+Feature_extraction.py
+Script for extracting features in data
+University of Bath student number: 1100837540  
+Modified on 25/04/23
 """
 
-# Imnport required libraries
+# Import required libraries
 import numpy as np
 import pickle
 
@@ -24,7 +24,7 @@ B0005_charge.pop("615")
 B0005_charge.pop("84")
 B0005_charge.pop("0")
 
- # Load in discharge data from battery 5
+# Load in discharge data from battery 5
 with open('B0005_discharge.pickle', 'rb') as f:
     B0005_discharge = pickle.load(f)
     
