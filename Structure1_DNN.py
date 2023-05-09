@@ -1,9 +1,10 @@
-
 """
-Created on Mon Mar 27 14:50:39 2023
-
-@author: billymitchell
+Feature_extraction.py
+Script for developing DNN for data structure 1
+University of Bath student number: 1100837540  
+Modified on 25/04/23
 """
+
 # Import required libraries
 import pickle
 import torch
