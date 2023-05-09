@@ -1,5 +1,12 @@
-import numpy as np
+"""
+Support_Vector_Machine.py
+Script for developing support vector machine model
+University of Bath student number: 1100837540  
+Modified on 09/05/23
+"""
 
+# Import required libraries
+import numpy as np
 import pickle
 from matplotlib import pyplot as plt
 from sklearn import svm
