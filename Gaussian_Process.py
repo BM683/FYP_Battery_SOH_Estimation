@@ -2,7 +2,7 @@
 Gaussian_Process.py
 Script for developing Gaussian process model
 University of Bath student number: 1100837540  
-Modified on 03/05/23
+Modified on 09/05/23
 """
 
 # Import required libraries
