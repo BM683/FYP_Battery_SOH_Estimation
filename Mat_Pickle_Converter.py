@@ -2,7 +2,7 @@
 Mat_Pickle_Converter.py
 Script for reading mat files, structuring data and saving to pickle files
 University of Bath student number: 1100837540  
-Modified on 02/05/23
+Modified on 09/05/23
 """
 
 # This code is based on a GitHub repository that served as a reference during development.
