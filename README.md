@@ -13,3 +13,6 @@ This repository includes all the python scripts that were developed for my final
 - Coupled_DNN.py - Python script that restructures the data to coupled structure and develops, trains and tests the corresponding DNNs.
 - Gaussian_Process.py - Python script that restructures the data to structure 2 and develops, trains and test the Gaussian Process model.
 - Support_Vector_Machine.py - Python script that restructures the data to structure 2 and develops, trains and test the Support vector machine model.
+- Structure1_DNN_Optim.py - Python script that runs the DNN architecture optimisation for the structure 1 DNN.
+- Structure2_DNN_Optim.py - Python script that runs the DNN architecture optimisation for the structure 2 DNN.
+- Coupled_DNN_Optim.py - Python script that runs the DNN architecture optimisation for the coupled strcuture DNNs.
