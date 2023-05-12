@@ -151,8 +151,6 @@ for i in hiddens:
     
     # Train the model
     for epoch in range(num_epochs):
-        if out == 1:
-            break
         # Training
         model.train()
         train_loss = 0
@@ -177,8 +175,7 @@ for i in hiddens:
                 real_output.append(y_val)
                 loss = criterion(output, y_val)
                 val_loss += loss.item()
-                # if loss < 0.0001 and (epoch > 400):
-                #     out = 1
+                
             val_losses.append(val_loss / len(val_loader))
     
         # Print loss
